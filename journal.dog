@@ -1,0 +1,15 @@
+#!/usr/bin/env dog
+
+REQUIRE "transcribe_journal.rb"
+
+CONFIG server = "http://arya.stanford.edu:3777/"
+CONFIG api_key = "950897c7975f977898f185aee3977a707ec50634"
+CONFIG project = "Transcribe Journals"
+
+IMPORT "input.json" AS input
+
+# categorizations = ASK PEOPLE TO CategorizeSegments ON input
+
+transcriptions = ASK PEOPLE TO TranscribeJournal ON input
+
+COMPUTE Print on transcriptions

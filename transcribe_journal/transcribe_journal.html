@@ -1,0 +1,27 @@
+<!-- Dormouse-Task-Meta
+
+input:
+  - not sure
+
+parameters:
+  - mode
+
+response:
+  - transcription
+
+-->
+
+<script src="<%= dormouse.resource("jquery.js") %>" type="text/javascript" charset="utf-8"></script>
+<script src="<%= dormouse.resource("transcribe.js") %>" type="text/javascript" charset="utf-8"></script>
+
+<link rel="stylesheet" href="<%= dormouse.resource("style.css") %>" type="text/css">
+
+<script type="text/javascript" charset="utf-8">
+$(function() {
+  console.log('mode', "<%= mode %>");
+});
+</script>
+
+<div>
+  Hi journal transcription
+</div>
