@@ -18,5 +18,12 @@ response:
 <link rel="stylesheet" href="<%= dormouse.resource("style.css") %>" type="text/css">
 
 <div>
-  <h3>Please write what you can read on in this segment of this journal</h3>
+  <label>Add a Text Transcription</label>
+  <p>Please write the text you can read in this journal segment below.</p>
+  <img src="<%= segment %>">
+  <hr>
+  <label for="transcription">Transcription</label>
+  <textarea id="transcription" name="transcription"></textarea>
+  <input type="button" value="Skip" >
+  <input type="submit" value="Transcribe">
 </div>
