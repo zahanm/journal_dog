@@ -5,6 +5,7 @@ input:
 
 parameters:
   - mode
+  - segment
 
 response:
   - transcription
@@ -16,12 +17,6 @@ response:
 
 <link rel="stylesheet" href="<%= dormouse.resource("style.css") %>" type="text/css">
 
-<script type="text/javascript" charset="utf-8">
-$(function() {
-  console.log('mode', "<%= mode %>");
-});
-</script>
-
 <div>
-  Hi journal transcription
+  <h3>Please write what you can read on in this segment of this journal</h3>
 </div>
