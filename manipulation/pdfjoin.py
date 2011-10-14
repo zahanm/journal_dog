@@ -3,35 +3,48 @@ from __future__ import print_function
 
 import sys
 import json
-from pyPdf import PdfFileWriter
+import itertools
+from xhtml2pdf import pisa
+
+try:
+  from cStringIO import StringIO
+except ImportError:
+  from StringIO import StringIO
+
+JOINED_FNAME = 'output/images.pdf'
 
 def assemble_page(fnames, transcriptions):
-  # TODO
+  buf = StringIO()
+  for fname in fnames:
+    buf.write("<div class=\"segment\"><img src=\"{0}\"></div>\n".format(fname))
+  return buf.getvalue()
 
 def join_pages(composites):
-  joined_fname = 'output.pdf'
-  joined_writer = PdfFileWriter()
+  HTML_HEAD = """
+  <html>
+  <body>
+  """
+  HTML_FOOT = """
+  </body>
+  </html>
+  """
+  joined_buf = StringIO()
+  joined_buf.write(HTML_HEAD)
   for collection in collect_pages(composites):
-    fnames = filter(lambda composite: return composite['fname'], composites)
-    transcriptions = filter(lambda composite: return composite['transcription'], composites)
-    page_fname = assemble_page(fnames, transcriptions):
-    with open(page_fname, 'rb') as page:
-      page_reader = PDFFileReader(page)
-      joined_writer.addPage(page_reader.getPage(0))
-  with open(joined_fname, 'wb') as joined_file:
-    joined_writer.write(joined_file)
+    fnames = map(lambda composite: composite['location'], collection)
+    transcriptions = map(lambda composite: composite['transcription'], collection)
+    page_html = assemble_page(fnames, transcriptions)
+    joined_buf.write(page_html)
+    joined_buf.write("<div> <pdf:nextpage /> </div>\n")
+  joined_buf.write(HTML_FOOT)
+  with open(JOINED_FNAME, 'wb') as pdf_file:
+    pdf = pisa.CreatePDF(joined_buf, pdf_file)
 
 def collect_pages(composites):
   # first sort by page number
-  composites.sort(key=lambda composite: return composite['page'])
-  collection = []
-  current_page = 0
-  for segment in composites:
-    if segment['page'] != current_page:
-      yield collection
-      collection = []
-      current_page = segment['page']
-    collection.append(segment)
+  composites.sort(key=lambda composite: composite['page'])
+  for page, collection in itertools.groupby(composites, key=lambda composite: composite['page']):
+    yield collection
 
 def decode_dog_output(output_fname):
   output = None
@@ -46,9 +59,9 @@ def decode_dog_output(output_fname):
   return output
 
 if __name__ == '__main__':
-  if len(sys.argv) != 2:
-    print('usage: python', __file__, 'output.json')
-    return
-  composites = decode_dog_output(sys.argv[1])
-  if composites:
-    join_pages(composites)
+  if len(sys.argv) == 2:
+    composites = decode_dog_output(sys.argv[1])
+    if composites:
+      join_pages(composites)
+  else:
+    print('usage: python', __file__, '<output_from_dog>')

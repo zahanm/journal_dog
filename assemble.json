@@ -7,11 +7,11 @@
   {
     "location": "data/image2.png",
     "transcription": "Let's see how the second fares.",
-    "page": 1
+    "page": 0
   },
   {
-    "location": "data/image1.png",
+    "location": "data/image3.png",
     "transcription": "And at last we have the third pretender. You guys are ridiculous.",
-    "page": 1
+    "page": 0
   }
 ]

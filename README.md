@@ -11,7 +11,7 @@ Privacy preserving journal transcription
     - html5lib
     - pil (Python Imaging Library)
 - brew or aptitude
-  - imgaemagick
+  - imagemagick
     - ghostscript
 
 Powered by [Dormouse](http://dormou.se)
