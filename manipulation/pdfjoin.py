@@ -25,7 +25,7 @@ def collect_pages(composites):
   # first sort by page number
   composites.sort(key=lambda composite: return composite['page'])
   collection = []
-  current_page = 1
+  current_page = 0
   for segment in composites:
     if segment['page'] != current_page:
       yield collection
@@ -43,7 +43,7 @@ def decode_dog_output(output_fname):
   if not output:
     print("{}")
     return None
-  return output['data']
+  return output
 
 if __name__ == '__main__':
   if len(sys.argv) != 2:

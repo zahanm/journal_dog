@@ -1,19 +1,17 @@
-{
-  "data": [
-    {
-      "location": "data/image1.png",
-      "transcription": "Hello world out there, this is the first of many.",
-      "page": 1
-    },
-    {
-      "location": "data/image2.png",
-      "transcription": "Let's see how the second fares.",
-      "page": 1
-    },
-    {
-      "location": "data/image1.png",
-      "transcription": "And at last we have the third pretender. You guys are ridiculous.",
-      "page": 1
-    }
-  ]
-}
+[
+  {
+    "location": "data/image1.png",
+    "transcription": "Hello world out there, this is the first of many.",
+    "page": 1
+  },
+  {
+    "location": "data/image2.png",
+    "transcription": "Let's see how the second fares.",
+    "page": 1
+  },
+  {
+    "location": "data/image1.png",
+    "transcription": "And at last we have the third pretender. You guys are ridiculous.",
+    "page": 1
+  }
+]
