@@ -12,31 +12,55 @@ except ImportError:
   from StringIO import StringIO
 
 JOINED_FNAME = 'output/images.pdf'
+HTML_HEAD = """
+<html>
+<head>
+<style type="text/css">
+.segment img {
+  z-index: 10;
+}
+.segment span {
+  z-index: 1;
+  position: relative;
+  left: -50%;
+  text-align: center;
+  vertical-align: center;
+}
+</style>
+</head>
+<body>
+"""
+HTML_FOOT = """
+</body>
+</html>
+"""
+SEARCHABLE_SNIPPET = """
+<div class=\"segment\">
+  <img src=\"{0}\">
+  <span>{1}</span>
+</div>
+"""
+
 
 def assemble_page(fnames, transcriptions):
   buf = StringIO()
-  for fname in fnames:
-    buf.write("<div class=\"segment\"><img src=\"{0}\"></div>\n".format(fname))
+  for fname, transcription in itertools.izip(fnames, transcriptions):
+    buf.write(SEARCHABLE_SNIPPET.format(fname, transcription))
   return buf.getvalue()
 
 def join_pages(composites):
-  HTML_HEAD = """
-  <html>
-  <body>
-  """
-  HTML_FOOT = """
-  </body>
-  </html>
-  """
   joined_buf = StringIO()
   joined_buf.write(HTML_HEAD)
   for collection in collect_pages(composites):
-    fnames = map(lambda composite: composite['location'], collection)
-    transcriptions = map(lambda composite: composite['transcription'], collection)
+    fnames, transcriptions = [], []
+    for r in collection:
+      fnames.append(r['location'])
+      transcriptions.append(r['transcription'])
     page_html = assemble_page(fnames, transcriptions)
     joined_buf.write(page_html)
     joined_buf.write("<div> <pdf:nextpage /> </div>\n")
   joined_buf.write(HTML_FOOT)
+  print(joined_buf.getvalue())
   with open(JOINED_FNAME, 'wb') as pdf_file:
     pdf = pisa.CreatePDF(joined_buf, pdf_file)
 
