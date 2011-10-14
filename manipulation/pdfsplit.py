@@ -20,9 +20,6 @@ def divide_page(png_fname):
   out_fnames = []
   # TODO
 
-def combine_page(png_fnames):
-  # TODO
-
 if __name__ == '__main__':
   if(len(sys.argv) == 2):
     split_pages(sys.argv[1])
