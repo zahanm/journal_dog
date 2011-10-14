@@ -1,0 +1,16 @@
+{
+  "data": [
+    {
+      "location": "data/image1.png",
+      "transcription": "Hello world out there, this is the first of many."
+    },
+    {
+      "location": "data/image2.png",
+      "transcription": "Let's see how the second fares."
+    },
+    {
+      "location": "data/image1.png",
+      "transcription": "And at last we have the third pretender. You guys are ridiculous."
+    }
+  ]
+}

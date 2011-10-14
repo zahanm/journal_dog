@@ -2,4 +2,8 @@
 .DS_Store
 .*.swp
 *~
+data/*.png
+data/*.pdf
+output/*.png
+output/*.pdf
 
