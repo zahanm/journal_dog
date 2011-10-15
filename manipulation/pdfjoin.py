@@ -81,7 +81,6 @@ LATEX_SNIPPET = """
 \\documentclass{{article}}
 \\usepackage[margin=0in, paperwidth={width}pt, paperheight={height}pt]{{geometry}}
 \\usepackage{{amsmath}}
-\\everymath{{\\displaystyle}}
 \\begin{{document}}
 \\begin{{{font_size}}}
 \\begin{{center}}
