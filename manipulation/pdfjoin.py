@@ -70,7 +70,7 @@ IGNORE = """
 """
 
 LATEX_SNIPPET = """
-\\usepackage[margin=0.5in, paperwidth={width}pt, paperheight={height}pt]{geometry}
+\\usepackage[margin=0.5in, paperwidth={width}pt, paperheight={height}pt]{{geometry}}
 \\begin{{document}}
 \\begin{{equation}}
 {raw_latex}
@@ -81,7 +81,7 @@ LATEX_SNIPPET = """
 def math_equation_image(fname, raw_latex):
   segment = Image.open(fname)
   width, height = segment.size
-  print(LATEX_SNIPPET.format(height=height, width=width, raw_latex=raw_latex))
+  return LATEX_SNIPPET.format(height=height, width=width, raw_latex=raw_latex)
 
 def assemble_transcribed_html(fnames, transcriptions):
   buf = StringIO()
@@ -147,14 +147,9 @@ def decode_dog_output(output_fname):
   return output
 
 if __name__ == '__main__':
-  # if len(sys.argv) == 2:
-  #   composites = decode_dog_output(sys.argv[1])
-  #   if composites:
-  #     print(join_pages(composites))
-  # else:
-  #   print('usage: python', __file__, '<output_from_dog>')
-  if len(sys.argv) == 3:
-    with open(sys.argv[2]) as latex_file:
-      print(math_equation_image(sys.argv[1], latex_file.read()))
+  if len(sys.argv) == 2:
+    composites = decode_dog_output(sys.argv[1])
+    if composites:
+      print(join_pages(composites))
   else:
-    print('usage: python', __file__, '<image_file>', '<raw_latex_file>', sys.argv)
+    print('usage: python', __file__, '<output_from_dog>')
