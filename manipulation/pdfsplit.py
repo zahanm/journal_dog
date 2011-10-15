@@ -85,15 +85,10 @@ def split_pdf(pdf_fname):
   return json.dumps(output)
 
 def cleanup_last_run():
+  file_globs = ['data/*.png', 'tmp/*.pdf', 'tmp/*.png', 'tmp/*.tex', 'tmp/*.aux', 'tmp/*.log']
   old_files = []
-  old_files.extend(glob('data/*.png'))
-  old_files.extend(glob('tmp/*.pdf'))
-  old_files.extend(glob('tmp/*.png'))
-  old_files.extend(glob('tmp/*.tex'))
-  old_files.extend(glob('tmp/*.aux'))
-  old_files.extend(glob('tmp/*.log'))
-  for old_file in old_files:
-    os.remove(old_file)
+  map(lambda fg: old_files.extend(glob(fg)), file_globs)
+  map(lambda old_file: os.remove(old_file), old_files)
 
 if __name__ == '__main__':
   if(len(sys.argv) == 2):
