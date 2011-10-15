@@ -4,25 +4,35 @@ from __future__ import print_function
 import sys
 import json
 import itertools
+from tempfile import NamedTemporaryFile
+
 from xhtml2pdf import pisa
+
+import Image
+
+from reportlab.pdfgen.canvas import Canvas
+from reportlab.platypus import Paragraph
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import inch
+
+from pyPdf import PdfFileReader, PdfFileWriter
 
 try:
   from cStringIO import StringIO
 except ImportError:
   from StringIO import StringIO
 
-JOINED_FNAME = 'output/images.pdf'
+JOINED_FNAME = 'output/transcribed.pdf'
+JOINED_HTML_FNAME = 'output/transcribed.html'
+JOINED_SEARCHABLE = 'output/searchable.pdf'
+PARA_PADDING = 25
 HTML_HEAD = """
 <html>
 <head>
 <style type="text/css">
-.segment img {
-  z-index: 10;
-}
-.segment span {
-  z-index: 1;
-  position: relative;
-  left: -50%;
+.segment p {
+  font-size: 16px;
   text-align: center;
   vertical-align: center;
 }
@@ -34,35 +44,63 @@ HTML_FOOT = """
 </body>
 </html>
 """
-SEARCHABLE_SNIPPET = """
-<div class=\"segment\">
-  <img src=\"{0}\">
-  <span>{1}</span>
+HTML_SNIPPET = """
+<div class="segment">
+  <p>{0}</p>
 </div>
 """
 
+def paint_original_segments(fnames, transcriptions, page):
+  pdf_fname = 'tmp/search_{0}.pdf'.format(page)
+  pdf = Canvas(pdf_fname, pagesize=A4)
+  top = A4[1]
+  for fname, transcription in itertools.izip(fnames, transcriptions):
+    segment = Image.open(fname)
+    width, height = segment.size
+    p = Paragraph(transcription, ParagraphStyle('Normal'))
+    p.wrapOn(pdf, A4[0] - PARA_PADDING * 2, height)
+    p.drawOn(pdf, PARA_PADDING, top - height / 2)
+    pdf.drawImage(fname, 0, top - height)
+    top -= height
+  pdf.save()
+  return pdf_fname
 
-def assemble_page(fnames, transcriptions):
+def assemble_transcribed_html(fnames, transcriptions):
   buf = StringIO()
   for fname, transcription in itertools.izip(fnames, transcriptions):
-    buf.write(SEARCHABLE_SNIPPET.format(fname, transcription))
+    buf.write(HTML_SNIPPET.format(transcription))
   return buf.getvalue()
 
 def join_pages(composites):
   joined_buf = StringIO()
   joined_buf.write(HTML_HEAD)
-  for collection in collect_pages(composites):
+  pdf_fnames = []
+  for page_num, collection in enumerate(collect_pages(composites)):
     fnames, transcriptions = [], []
     for r in collection:
       fnames.append(r['location'])
       transcriptions.append(r['transcription'])
-    page_html = assemble_page(fnames, transcriptions)
+    page_html = assemble_transcribed_html(fnames, transcriptions)
+    pdf_fnames.append(paint_original_segments(fnames, transcriptions, page_num))
     joined_buf.write(page_html)
     joined_buf.write("<div> <pdf:nextpage /> </div>\n")
   joined_buf.write(HTML_FOOT)
-  print(joined_buf.getvalue())
+  # HTML and transcribed pdf
+  with open(JOINED_HTML_FNAME, 'w') as html_file:
+    html_file.write(joined_buf.getvalue())
   with open(JOINED_FNAME, 'wb') as pdf_file:
     pdf = pisa.CreatePDF(joined_buf, pdf_file)
+  # searchable pdf
+  pdf_writer = PdfFileWriter()
+  pdf_pages = []
+  for pdf_fname in pdf_fnames:
+    pdf_pages.append(open(pdf_fname, 'rb'))
+    pdf_reader = PdfFileReader(pdf_pages[-1])
+    pdf_writer.addPage(pdf_reader.getPage(0))
+  with open(JOINED_SEARCHABLE, 'wb') as pdf_searchable:
+    pdf_writer.write(pdf_searchable)
+  map(lambda f: f.close(), pdf_pages)
+
 
 def collect_pages(composites):
   # first sort by page number
