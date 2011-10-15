@@ -1,5 +1,6 @@
 #!/usr/bin/env dog
 
+REQUIRE "image_manipulation.rb"
 REQUIRE "transcribe_journal.rb"
 
 CONFIG server = "http://arya.stanford.edu:3777/"

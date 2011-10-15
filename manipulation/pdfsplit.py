@@ -55,10 +55,10 @@ def split_pdf(pdf_fname):
       output.append({ 'location': segment_fname, 'page': page })
   with open(DOG_INPUT_FNAME, 'w') as dog_input:
     json.dump(output, dog_input)
-  return output
+  return json.dumps(output)
 
 if __name__ == '__main__':
   if(len(sys.argv) == 2):
-    split_pdf(sys.argv[1])
+    print(split_pdf(sys.argv[1]))
   else:
     print('usage: python', __file__, '<input_pdf>')

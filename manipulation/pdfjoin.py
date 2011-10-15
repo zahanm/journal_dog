@@ -100,6 +100,11 @@ def join_pages(composites):
   with open(JOINED_SEARCHABLE, 'wb') as pdf_searchable:
     pdf_writer.write(pdf_searchable)
   map(lambda f: f.close(), pdf_pages)
+  return json.dumps({
+    'transcribed_html': JOINED_HTML_FNAME,
+    'transcribed_pdf': JOINED_FNAME,
+    'searchable_pdf': JOINED_SEARCHABLE
+  })
 
 
 def collect_pages(composites):
@@ -124,6 +129,6 @@ if __name__ == '__main__':
   if len(sys.argv) == 2:
     composites = decode_dog_output(sys.argv[1])
     if composites:
-      join_pages(composites)
+      print(join_pages(composites))
   else:
     print('usage: python', __file__, '<output_from_dog>')
