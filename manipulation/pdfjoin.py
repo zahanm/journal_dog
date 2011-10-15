@@ -45,7 +45,7 @@ HTML_FOOT = """
 </html>
 """
 HTML_SNIPPET = """
-<div class=\"segment\">
+<div class="segment">
   <p>{0}</p>
 </div>
 """

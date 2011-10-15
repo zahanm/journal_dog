@@ -8,4 +8,5 @@ output/*.png
 output/*.pdf
 output/*.html
 tmp/*.pdf
+tmp/*.png
 
