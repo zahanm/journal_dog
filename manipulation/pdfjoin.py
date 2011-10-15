@@ -58,7 +58,7 @@ HTML_PARA_SNIPPET = """
   <p>{0}</p>
 """
 HTML_IMAGE_SNIPPET = """
-  <img src="{0}">
+  <img src="{0}" />
 """
 
 def paint_original_segments(fnames, transcriptions, page):
@@ -123,7 +123,7 @@ def assemble_transcribed_html(fnames, transcriptions, types):
       # transcription type is 'text'
       for line in transcription.split('\n'):
         buf.write(HTML_PARA_SNIPPET.format(line.strip()))
-    buf.write('</div>')
+    buf.write('</div>\n')
   return buf.getvalue()
 
 def join_pages(composites):
