@@ -13,6 +13,7 @@ import Image
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.platypus import Paragraph
 from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import inch
 
@@ -25,7 +26,7 @@ except ImportError:
 
 JOINED_FNAME = 'output/transcribed.pdf'
 JOINED_HTML_FNAME = 'output/transcribed.html'
-JOINED_SEARCHABLE = 'output/searchable.pdf'
+JOINED_SEARCHABLE = 'output/overlay.pdf'
 PARA_PADDING = 25
 HTML_HEAD = """
 <html>
@@ -55,7 +56,7 @@ def paint_original_segments(fnames, transcriptions, page):
   for fname, transcription in itertools.izip(fnames, transcriptions):
     segment = Image.open(fname)
     width, height = segment.size
-    p = Paragraph(transcription, ParagraphStyle('Normal'))
+    p = Paragraph(transcription, ParagraphStyle('Normal', alignment=TA_CENTER))
     p.wrapOn(pdf, A4[0] - PARA_PADDING * 2, height)
     p.drawOn(pdf, PARA_PADDING, top - height / 2)
     pdf.drawImage(fname, 0, top - height)
