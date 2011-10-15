@@ -12,6 +12,18 @@ def split_pdf(pdf_fname)
   emit dog_input
 end
 
+=begin
+dog output format:
+[
+  {
+    "location": "data/segment_0_1.png",
+    "transcription": "Hellow out there",
+    "page": 0
+  },
+  ...
+]
+=end
+
 def join_images(json_output_fname)
   dog_output = `python2.7 manipulation/pdfjoin.py #{json_output_fname}`
   emit dog_output
