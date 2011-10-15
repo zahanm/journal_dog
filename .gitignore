@@ -13,3 +13,6 @@ tmp/*.tex
 tmp/*.aux
 tmp/*.log
 
+split.json
+assemble.json
+
