@@ -1,5 +1,6 @@
 
 .DS_Store
+*.pyc
 .*.swp
 *~
 data/*.png
@@ -9,4 +10,7 @@ output/*.pdf
 output/*.html
 tmp/*.pdf
 tmp/*.png
+tmp/*.tex
+tmp/*.aux
+tmp/*.log
 

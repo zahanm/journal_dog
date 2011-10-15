@@ -2,8 +2,10 @@
 from __future__ import print_function
 
 import sys
+import os
 import json
 from subprocess import call, PIPE
+from glob import glob
 
 import Image
 
@@ -57,8 +59,21 @@ def split_pdf(pdf_fname):
     json.dump(output, dog_input)
   return json.dumps(output)
 
+def cleanup_last_run():
+  old_files = []
+  old_files.extend(glob('data/*.png'))
+  old_files.extend(glob('tmp/*.png'))
+  old_files.extend(glob('tmp/*.pdf'))
+  old_files.extend(glob('tmp/*.tex'))
+  old_files.extend(glob('tmp/*.aux'))
+  old_files.extend(glob('tmp/*.log'))
+  old_files.extend(glob('tmp/*.pdf'))
+  for old_file in old_files:
+    os.remove(old_file)
+
 if __name__ == '__main__':
   if(len(sys.argv) == 2):
+    cleanup_last_run()
     print(split_pdf(sys.argv[1]))
   else:
     print('usage: python', __file__, '<input_pdf>')
