@@ -44,10 +44,8 @@ HTML_FOOT = """
 </body>
 </html>
 """
-HTML_SNIPPET = """
-<div class="segment">
+HTML_PARA_SNIPPET = """
   <p>{0}</p>
-</div>
 """
 
 def paint_original_segments(fnames, transcriptions, page):
@@ -68,7 +66,10 @@ def paint_original_segments(fnames, transcriptions, page):
 def assemble_transcribed_html(fnames, transcriptions):
   buf = StringIO()
   for fname, transcription in itertools.izip(fnames, transcriptions):
-    buf.write(HTML_SNIPPET.format(transcription))
+    buf.write('<div class="segment">')
+    for line in transcription.split('\n'):
+      buf.write(HTML_PARA_SNIPPET.format(line.strip()))
+    buf.write('</div>')
   return buf.getvalue()
 
 def join_pages(composites):
