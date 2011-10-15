@@ -15,15 +15,68 @@ response:
 <script src="<%= dormouse.resource("jquery.js") %>" type="text/javascript" charset="utf-8"></script>
 <script src="<%= dormouse.resource("transcribe.js") %>" type="text/javascript" charset="utf-8"></script>
 
+<style type="text/css" media="screen">
+	.transcribe-box {
+		text-align:center;
+		border:1px solid #ccc;
+		margin:0px 10px;
+	}
+	
+	.transcribe-box img {
+		margin:15px auto;
+	}
+	
+	.transcribe-box textarea {
+		margin:10px;
+		padding:0px;
+		width:95% !important;
+	}
+	
+	.actions {
+		text-align:center;
+		position:relative;
+		top:180px;
+	}
+	
+	
+</style>
+
 <link rel="stylesheet" href="<%= dormouse.resource("style.css") %>" type="text/css">
 
-<div>
-  <label>Add a Text Transcription</label>
-  <p>Please write the text you can read in this journal segment below.</p>
-  <img src="<%= segment %>">
-  <hr>
-  <label for="transcription">Transcription</label>
-  <textarea id="transcription" name="transcription"></textarea>
-  <input type="button" value="Skip" >
-  <input type="submit" value="Transcribe">
+<div class="columns-two-right-sidebar">
+
+<div class="left">
+	
+	<div class="transcribe-box">
+		
+	  <img src="<%= segment %>">
+	  <hr>
+
+
+	  <textarea id="transcription" name="transcription"></textarea>
+		
+		
+	</div>
+
+
+	
 </div>
+<div class="right">
+	
+	<label>Transcribe Text Snippet</label>
+ 	<p>
+ 		There is a snippet of handwritten text in the top center box. Transcribe it in the box below it.
+ 	</p>
+	
+	<div class="actions">
+		<input type="button" value="Skip" >
+	  <input type="submit" value="Transcribe">
+	</div>
+
+	
+</div>	
+	
+	<div class="clear"></div>
+	
+</div>
+
