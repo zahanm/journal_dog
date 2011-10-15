@@ -4,7 +4,7 @@ from __future__ import print_function
 import sys
 import os
 import json
-from subprocess import call, PIPE
+from subprocess import call
 from glob import glob
 
 import Image

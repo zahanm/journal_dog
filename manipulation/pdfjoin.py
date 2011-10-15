@@ -4,7 +4,9 @@ from __future__ import print_function
 import sys
 import json
 import itertools
+import os.path
 from tempfile import NamedTemporaryFile
+from subprocess import call, PIPE
 
 from xhtml2pdf import pisa
 
@@ -19,14 +21,16 @@ from reportlab.lib.units import inch
 
 from pyPdf import PdfFileReader, PdfFileWriter
 
+from utils import strip_extra_whitespace
+
 try:
   from cStringIO import StringIO
 except ImportError:
   from StringIO import StringIO
 
-JOINED_FNAME = 'output/transcribed.pdf'
-JOINED_HTML_FNAME = 'output/transcribed.html'
-JOINED_SEARCHABLE = 'output/overlay.pdf'
+JOINED_FNAME = 'output_transcribed.pdf'
+JOINED_HTML_FNAME = 'output_transcribed.html'
+JOINED_SEARCHABLE = 'output_overlay.pdf'
 PARA_PADDING = 25
 HTML_HEAD = """
 <html>
@@ -36,6 +40,11 @@ HTML_HEAD = """
   font-size: 16px;
   text-align: center;
   vertical-align: center;
+}
+.segment img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 </style>
 </head>
@@ -47,6 +56,9 @@ HTML_FOOT = """
 """
 HTML_PARA_SNIPPET = """
   <p>{0}</p>
+"""
+HTML_IMAGE_SNIPPET = """
+  <img src="{0}">
 """
 
 def paint_original_segments(fnames, transcriptions, page):
@@ -64,44 +76,68 @@ def paint_original_segments(fnames, transcriptions, page):
   pdf.save()
   return pdf_fname
 
-IGNORE = """
-\\setlength{{\\pdfpageheight}}{{{height}pt}}
-\\setlength{{\\pdfpagewidth}}{{{width}pt}}
-"""
-
+LATEX_TMP_FNAME = 'builder.{format}'
 LATEX_SNIPPET = """
-\\usepackage[margin=0.5in, paperwidth={width}pt, paperheight={height}pt]{{geometry}}
+\\documentclass{{article}}
+\\usepackage[margin=0in, paperwidth={width}pt, paperheight={height}pt]{{geometry}}
+\\usepackage{{amsmath}}
+\\everymath{{\\displaystyle}}
 \\begin{{document}}
-\\begin{{equation}}
+\\begin{{{font_size}}}
+\\begin{{center}}
+\\vspace*{{\\fill}}
+\\begin{{equation*}}
 {raw_latex}
-\\end{{equation}}
+\\end{{equation*}}
+\\vspace*{{\\fill}}
+\\end{{center}}
+\\end{{{font_size}}}
 \\end{{document}}
 """
 
 def math_equation_image(fname, raw_latex):
   segment = Image.open(fname)
   width, height = segment.size
-  return LATEX_SNIPPET.format(height=height, width=width, raw_latex=raw_latex)
+  with open(os.path.join('tmp', LATEX_TMP_FNAME.format(format='tex')), 'w') as latex_file:
+    latex_file.write(LATEX_SNIPPET.format(height=height, width=width, font_size='large', raw_latex=raw_latex.strip()))
+  pdfcreator = ['pdflatex', '-interaction', 'batchmode', '-output-directory', 'tmp', LATEX_TMP_FNAME.format(format='tex')]
+  retcode = call(pdfcreator, stdout=PIPE)
+  if retcode != 0:
+    raise RuntimeError('Error while creating math image with pdflatex')
+  png_fname = os.path.join('tmp', os.path.basename(fname))
+  converter = ['convert', os.path.join('tmp', LATEX_TMP_FNAME.format(format='pdf')), '-quality', '4', png_fname]
+  retcode = call(converter, stdout=PIPE)
+  if retcode != 0:
+    raise RuntimeError('Error while converting math image using imagemagick')
+  return png_fname
 
-def assemble_transcribed_html(fnames, transcriptions):
+def assemble_transcribed_html(fnames, transcriptions, types):
   buf = StringIO()
-  for fname, transcription in itertools.izip(fnames, transcriptions):
+  for fname, transcription, t_type in itertools.izip(fnames, transcriptions, types):
     buf.write('<div class="segment">')
-    for line in transcription.split('\n'):
-      buf.write(HTML_PARA_SNIPPET.format(line.strip()))
+    if t_type == 'math':
+      raw_latex = strip_extra_whitespace(transcription)
+      math_image_fname = math_equation_image(fname, raw_latex)
+      buf.write(HTML_IMAGE_SNIPPET.format(math_image_fname))
+    else:
+      # transcription type is 'text'
+      for line in transcription.split('\n'):
+        buf.write(HTML_PARA_SNIPPET.format(line.strip()))
     buf.write('</div>')
   return buf.getvalue()
 
 def join_pages(composites):
+  pisa.showLogging() # DEBUG
   joined_buf = StringIO()
   joined_buf.write(HTML_HEAD)
   pdf_fnames = []
   for page_num, collection in enumerate(collect_pages(composites)):
-    fnames, transcriptions = [], []
+    fnames, transcriptions, types = [], [], []
     for r in collection:
       fnames.append(r['location'])
       transcriptions.append(r['transcription'])
-    page_html = assemble_transcribed_html(fnames, transcriptions)
+      types.append(r['type'])
+    page_html = assemble_transcribed_html(fnames, transcriptions, types)
     pdf_fnames.append(paint_original_segments(fnames, transcriptions, page_num))
     joined_buf.write(page_html)
     joined_buf.write("<div> <pdf:nextpage /> </div>\n")

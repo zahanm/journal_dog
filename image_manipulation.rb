@@ -17,11 +17,13 @@ dog output format:
 [
   {
     "location": "data/segment_0_1.png",
-    "transcription": "Hellow out there",
-    "page": 0
+    "transcription": "Hello out there",
+    "page": 0,
+    "type": "text"
   },
   ...
 ]
+note: type can be "text" or "math"
 =end
 
 def join_images(json_output_fname)
