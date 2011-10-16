@@ -126,7 +126,7 @@ def assemble_transcribed_html(fnames, transcriptions, types):
   return buf.getvalue()
 
 def join_pages(composites):
-  pisa.showLogging() # DEBUG
+  # pisa.showLogging() # DEBUG
   joined_buf = StringIO()
   joined_buf.write(HTML_HEAD)
   pdf_fnames = []
@@ -144,8 +144,8 @@ def join_pages(composites):
   # HTML and transcribed pdf
   with open(JOINED_HTML_FNAME, 'w') as html_file:
     html_file.write(joined_buf.getvalue())
-  with open(JOINED_FNAME, 'wb') as pdf_file:
-    pdf = pisa.CreatePDF(joined_buf, pdf_file)
+  # with open(JOINED_FNAME, 'wb') as pdf_file:
+  #   pdf = pisa.CreatePDF(joined_buf, pdf_file)
   # searchable pdf
   pdf_writer = PdfFileWriter()
   pdf_pages = []
