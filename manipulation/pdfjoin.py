@@ -7,7 +7,6 @@ import itertools
 import os.path
 from tempfile import NamedTemporaryFile
 from subprocess import call, PIPE
-from base64 import standard_b64encode
 
 from xhtml2pdf import pisa
 
@@ -59,7 +58,7 @@ HTML_PARA_SNIPPET = """
   <p>{0}</p>
 """
 HTML_IMAGE_SNIPPET = """
-  <img src="data:image/png;base64,{0}" />
+  <img src="{0}" />
 """
 
 def paint_original_segments(fnames, transcriptions, page):
@@ -109,8 +108,7 @@ def math_equation_image(fname, raw_latex):
   retcode = call(converter, stdout=PIPE)
   if retcode != 0:
     raise RuntimeError('Error while converting math image using imagemagick')
-  # return os.path.join('images', os.path.basename(fname))
-  return png_fname
+  return os.path.join('images', os.path.basename(fname))
 
 def assemble_transcribed_html(fnames, transcriptions, types):
   buf = StringIO()
@@ -119,8 +117,7 @@ def assemble_transcribed_html(fnames, transcriptions, types):
     if t_type == 'math':
       raw_latex = strip_extra_whitespace(transcription)
       math_image_fname = math_equation_image(fname, raw_latex)
-      with open(math_image_fname, 'rb') as math_image:
-        buf.write(HTML_IMAGE_SNIPPET.format(standard_b64encode(math_image.read())))
+      buf.write(HTML_IMAGE_SNIPPET.format(math_image_fname))
     else:
       # transcription type is 'text'
       for line in transcription.split('\n'):
