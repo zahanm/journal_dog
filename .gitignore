@@ -4,8 +4,9 @@
 .*.swp
 *~
 data/*.png
-output_*.pdf
-output_*.html
+output/*.pdf
+output/*.html
+output/images/*.png
 tmp/*.pdf
 tmp/*.png
 tmp/*.tex

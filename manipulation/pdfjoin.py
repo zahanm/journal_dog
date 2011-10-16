@@ -28,9 +28,9 @@ try:
 except ImportError:
   from StringIO import StringIO
 
-JOINED_FNAME = 'output_transcribed.pdf'
-JOINED_HTML_FNAME = 'output_transcribed.html'
-JOINED_SEARCHABLE = 'output_overlay.pdf'
+JOINED_FNAME = 'output/transcribed.pdf'
+JOINED_HTML_FNAME = 'output/transcribed.html'
+JOINED_SEARCHABLE = 'output/overlay.pdf'
 PARA_PADDING = 25
 HTML_HEAD = """
 <html>
@@ -104,12 +104,12 @@ def math_equation_image(fname, raw_latex):
   retcode = call(pdfcreator, stdout=PIPE)
   if retcode != 0:
     raise RuntimeError('Error while creating math image with pdflatex')
-  png_fname = os.path.join('tmp', os.path.basename(fname))
+  png_fname = os.path.join('output', 'images', os.path.basename(fname))
   converter = ['convert', os.path.join('tmp', LATEX_TMP_FNAME.format(format='pdf')), '-quality', '4', png_fname]
   retcode = call(converter, stdout=PIPE)
   if retcode != 0:
     raise RuntimeError('Error while converting math image using imagemagick')
-  return png_fname
+  return os.path.join('images', os.path.basename(fname))
 
 def assemble_transcribed_html(fnames, transcriptions, types):
   buf = StringIO()
