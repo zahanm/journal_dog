@@ -1,16 +1,30 @@
 #!/usr/bin/env dog
 
-REQUIRE "image_manipulation.rb"
-REQUIRE "transcribe_journal.rb"
-
-CONFIG server = "http://arya.stanford.edu:3777/"
-CONFIG api_key = "950897c7975f977898f185aee3977a707ec50634"
+CONFIG server = "http://localhost:3000/"
+CONFIG api_key = "8f46afb4ad6b065007df3b2afda480eadf2dca47"
 CONFIG project = "Transcribe Journals"
 
-IMPORT "input.json" AS input
+REQUIRE "assemble.rb"
+REQUIRE "transcribe.rb"
+REQUIRE "segmentation.rb"
 
-# categorizations = ASK PEOPLE TO CategorizeSegments ON input
+IMPORT "files.json" AS files
 
-transcriptions = ASK PEOPLE TO TranscribeJournal ON input
+pieces = COMPUTE Segmentation ON files USING file_type = "pdf" AND split_on_white_space = true
 
-COMPUTE Print ON transcriptions
+turkers = PEOPLE FROM MechanicalTurk
+media_lab_students = PEOPLE FROM MediaLab WHERE programming_langauges CONTAINS "LaTeX" AND status == "student"
+
+labeled_pieces = ASK turkers TO Classify ON pieces USING instructions = "Does this piece of text contain a math expression?" AND auto_upload = true
+
+math_pieces = COMPUTE Filter ON labeled_pieces USING key = "yes"
+text_pieces = COMPUTE Filter ON labeled_pieces USING key = "no"
+
+transcribed_text_pieces = ASK turkers TO Transcribe ON text_pieces USING auto_upload = true
+transcribed_math_pieces = ASK media_lab_students TO Transcribe ON math_pieces USING mode = "math" AND auto_upload = true
+
+transcribed_pieces = transcribed_text_pieces MERGE transcribed_math_pieces
+
+
+
+COMPUTE Assemble ON transcribed_pieces USING path = "output"
