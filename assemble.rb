@@ -8,10 +8,12 @@ module ManReduce
     
     def reduce(key, values)
       segments = File.join(File.dirname($0), "segments.json")
-      if !File.exists?(segments) then
-        file = File.open(segments, 'w')
-        file.write(values.to_json)
-      end
+      
+      file = File.open(segments, 'w')
+      file.write(values.to_json)
+      
+      #if !File.exists?(segments) then
+      #end
       `python2.7 manipulation/pdfjoin.py #{segments}`
       
     end
