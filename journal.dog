@@ -12,7 +12,7 @@ IMPORT "files.json" AS files
 
 pieces = COMPUTE Segmentation ON files USING file_type = "pdf" AND split_on_white_space = true
 
-turkers = PEOPLE FROM MechanicalTurk
+turkers = PEOPLE FROM MechanicalTurk WHERE payment == "0.10"
 media_lab_students = PEOPLE FROM MediaLab WHERE programming_langauges CONTAINS "LaTeX" AND status == "student"
 
 labeled_pieces = ASK turkers TO Classify ON pieces USING instructions = "Does this piece of text contain a math expression?" AND auto_upload = true
@@ -24,7 +24,5 @@ transcribed_text_pieces = ASK turkers TO Transcribe ON text_pieces USING auto_up
 transcribed_math_pieces = ASK media_lab_students TO Transcribe ON math_pieces USING mode = "math" AND auto_upload = true
 
 transcribed_pieces = transcribed_text_pieces MERGE transcribed_math_pieces
-
-
 
 COMPUTE Assemble ON transcribed_pieces USING path = "output"
