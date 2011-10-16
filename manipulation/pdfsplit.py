@@ -4,7 +4,7 @@ from __future__ import print_function
 import sys
 import os
 import json
-from subprocess import call, PIPE
+from subprocess import call
 from glob import glob
 
 import Image
@@ -85,7 +85,8 @@ def split_pdf(pdf_fname):
   return json.dumps(output)
 
 def cleanup_last_run():
-  file_globs = ['data/*.png', 'tmp/*.pdf', 'tmp/*.png', 'tmp/*.tex', 'tmp/*.aux', 'tmp/*.log']
+  file_globs = ['data/*.png', 'tmp/*.pdf', 'tmp/*.png', 'tmp/*.tex',
+    'tmp/*.aux', 'tmp/*.log', 'output/*.pdf', 'output/images/*.png']
   old_files = []
   map(lambda fg: old_files.extend(glob(fg)), file_globs)
   map(lambda old_file: os.remove(old_file), old_files)
