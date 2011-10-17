@@ -95,12 +95,11 @@ def assemble_latex(fnames, transcriptions, types):
       buf.write(LATEX_EQN_SNIPPET.format(stripped))
     else:
       # t_type= 'text'
-      buf.write(stripped)
+      buf.write(stripped.replace('_', '\_').replace('^', '\^'))
   return buf.getvalue()
 
 def join_pages(composites):
   latex_buf = StringIO()
-  latex_buf.write(LATEX_HEAD)
   pdf_fnames = []
   for page_num, collection in enumerate(collect_pages(composites)):
     fnames, transcriptions, types = [], [], []
