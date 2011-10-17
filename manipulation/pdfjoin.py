@@ -102,12 +102,14 @@ def math_equation_image(fname, raw_latex):
   pdfcreator = ['pdflatex', '-interaction', 'batchmode', '-output-directory', 'tmp', LATEX_TMP_FNAME.format(format='tex')]
   retcode = call(pdfcreator, stdout=PIPE)
   if retcode != 0:
-    raise RuntimeError('Error while creating math image with pdflatex')
+    return 'images/{0}'.format(fname)
+    # raise RuntimeError('Error while creating math image with pdflatex')
   png_fname = os.path.join('output', 'images', os.path.basename(fname))
   converter = ['convert', os.path.join('tmp', LATEX_TMP_FNAME.format(format='pdf')), '-quality', '4', png_fname]
   retcode = call(converter, stdout=PIPE)
   if retcode != 0:
-    raise RuntimeError('Error while converting math image using imagemagick')
+    return 'images/{0}'.format(fname)
+    # raise RuntimeError('Error while converting math image using imagemagick')
   return os.path.join('images', os.path.basename(fname))
 
 def assemble_transcribed_html(fnames, transcriptions, types):
@@ -146,6 +148,7 @@ def join_pages(composites):
     html_file.write(joined_buf.getvalue())
   # with open(JOINED_FNAME, 'wb') as pdf_file:
   #   pdf = pisa.CreatePDF(joined_buf, pdf_file)
+  # ---
   # searchable pdf
   pdf_writer = PdfFileWriter()
   pdf_pages = []
