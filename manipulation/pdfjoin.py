@@ -98,12 +98,14 @@ def math_equation_image(fname, raw_latex):
   segment = Image.open(fname)
   width, height = segment.size
   with open(os.path.join('tmp', LATEX_TMP_FNAME.format(format='tex')), 'w') as latex_file:
-    latex_file.write(LATEX_SNIPPET.format(height=height, width=width, font_size='large', raw_latex=raw_latex.strip()))
-  pdfcreator = ['pdflatex', '-interaction', 'batchmode', '-output-directory', 'tmp', LATEX_TMP_FNAME.format(format='tex')]
+    latex_file.write(LATEX_SNIPPET.format(height=2*height, width=width, font_size='large', raw_latex=raw_latex.strip()))
+  pdfcreator = ['pdflatex', '-interaction', 'nonstopmode', '-output-directory', 'tmp', LATEX_TMP_FNAME.format(format='tex')]
   child = Popen(pdfcreator, stdout=PIPE)
   retcode = child.wait()
   if retcode != 0:
     stdoutdata, stderrdata = child.communicate()
+    sys.stderr.write(fname + '\n')
+    sys.stderr.write(raw_latex + '\n')
     sys.stderr.write(stdoutdata + '\n')
     return 'images/{0}'.format(fname)
     # raise RuntimeError('Error while creating math image with pdflatex')
