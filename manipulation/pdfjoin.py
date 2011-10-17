@@ -50,9 +50,7 @@ LATEX_WRAP = """
 \\usepackage{{amsmath}}
 \\begin{{document}}
 \\begin{{{font_size}}}
-\\begin{{center}}
 {raw_latex}
-\\end{{center}}
 \\end{{{font_size}}}
 \\end{{document}}
 """
