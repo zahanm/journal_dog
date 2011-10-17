@@ -12,7 +12,7 @@ tmp/*.png
 tmp/*.tex
 tmp/*.aux
 tmp/*.log
-db/*.sqlite3
+db
 
 split.json
 assemble.json
