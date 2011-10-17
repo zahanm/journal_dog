@@ -7,8 +7,7 @@ import itertools
 import os.path
 from tempfile import NamedTemporaryFile
 from subprocess import Popen, PIPE
-
-from xhtml2pdf import pisa
+from shutil import move
 
 import Image
 
@@ -28,38 +27,8 @@ try:
 except ImportError:
   from StringIO import StringIO
 
-JOINED_FNAME = 'output/transcribed.pdf'
-JOINED_HTML_FNAME = 'output/transcribed.html'
-JOINED_SEARCHABLE = 'output/overlay.pdf'
+OVERLAY_PDF_FNAME = 'output/overlay.pdf'
 PARA_PADDING = 25
-HTML_HEAD = """
-<html>
-<head>
-<style type="text/css">
-.segment p {
-  font-size: 16px;
-  text-align: center;
-  vertical-align: center;
-}
-.segment img {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
-</style>
-</head>
-<body>
-"""
-HTML_FOOT = """
-</body>
-</html>
-"""
-HTML_PARA_SNIPPET = """
-  <p>{0}</p>
-"""
-HTML_IMAGE_SNIPPET = """
-  <img src="{0}" />
-"""
 
 def paint_original_segments(fnames, transcriptions, page):
   pdf_fname = 'tmp/search_{0}.pdf'.format(page)
@@ -76,69 +45,62 @@ def paint_original_segments(fnames, transcriptions, page):
   pdf.save()
   return pdf_fname
 
-LATEX_TMP_FNAME = 'builder.{format}'
-LATEX_SNIPPET = """
+LATEX_WRAP = """
 \\documentclass{{article}}
-\\usepackage[margin=0in, paperwidth={width}pt, paperheight={height}pt]{{geometry}}
 \\usepackage{{amsmath}}
 \\begin{{document}}
 \\begin{{{font_size}}}
 \\begin{{center}}
-\\vspace*{{\\fill}}
-\\begin{{equation*}}
 {raw_latex}
-\\end{{equation*}}
-\\vspace*{{\\fill}}
 \\end{{center}}
 \\end{{{font_size}}}
 \\end{{document}}
 """
 
-def math_equation_image(fname, raw_latex):
-  segment = Image.open(fname)
-  width, height = segment.size
+LATEX_EQN_SNIPPET = """
+\\begin{{equation*}}
+{0}
+\\end{{equation*}}
+"""
+
+LATEX_NEWPAGE_SNIPPET = """
+\\newpage
+"""
+
+LATEX_FONT_SIZE = 'large'
+
+LATEX_TMP_FNAME = 'builder.{format}'
+LATEX_PDF_FNAME = 'output/transcribed.pdf'
+
+def latex_to_pdf(raw_latex):
   with open(os.path.join('tmp', LATEX_TMP_FNAME.format(format='tex')), 'w') as latex_file:
-    latex_file.write(LATEX_SNIPPET.format(height=2*height, width=width, font_size='large', raw_latex=raw_latex.strip()))
+    latex_file.write(raw_latex)
   pdfcreator = ['pdflatex', '-interaction', 'nonstopmode', '-output-directory', 'tmp', LATEX_TMP_FNAME.format(format='tex')]
   child = Popen(pdfcreator, stdout=PIPE)
   retcode = child.wait()
   if retcode != 0:
     stdoutdata, stderrdata = child.communicate()
-    sys.stderr.write(fname + '\n')
     sys.stderr.write(raw_latex + '\n')
     sys.stderr.write(stdoutdata + '\n')
-    return 'images/{0}'.format(fname)
+    return LATEX_TMP_FNAME.format('tex')
     # raise RuntimeError('Error while creating math image with pdflatex')
-  png_fname = os.path.join('output', 'images', os.path.basename(fname))
-  converter = ['convert', os.path.join('tmp', LATEX_TMP_FNAME.format(format='pdf')), '-quality', '4', png_fname]
-  child = Popen(converter, stdout=PIPE, stderr=PIPE)
-  retcode = child.wait()
-  if retcode != 0:
-    stdoutdata, stderrdata = child.communicate()
-    sys.stderr.write(stdoutdata + '\n' + stderrdata + '\n')
-    return 'images/{0}'.format(fname)
-    # raise RuntimeError('Error while converting math image using imagemagick')
-  return os.path.join('images', os.path.basename(fname))
+  move(os.path.join('tmp', LATEX_TMP_FNAME.format(format='pdf')), LATEX_PDF_FNAME)
+  return LATEX_PDF_FNAME
 
-def assemble_transcribed_html(fnames, transcriptions, types):
+def assemble_latex(fnames, transcriptions, types):
   buf = StringIO()
-  for fname, transcription, t_type in itertools.izip(fnames, transcriptions, types):
-    buf.write('<div class="segment">')
+  for transcription, t_type in itertools.izip(transcriptions, types):
+    stripped = strip_extra_whitespace(transcription)
     if t_type == 'math':
-      raw_latex = strip_extra_whitespace(transcription)
-      math_image_fname = math_equation_image(fname, raw_latex)
-      buf.write(HTML_IMAGE_SNIPPET.format(math_image_fname))
+      buf.write(LATEX_EQN_SNIPPET.format(stripped))
     else:
-      # transcription type is 'text'
-      for line in transcription.split('\n'):
-        buf.write(HTML_PARA_SNIPPET.format(line.strip()))
-    buf.write('</div>\n')
+      # t_type= 'text'
+      buf.write(stripped)
   return buf.getvalue()
 
 def join_pages(composites):
-  # pisa.showLogging() # DEBUG
-  joined_buf = StringIO()
-  joined_buf.write(HTML_HEAD)
+  latex_buf = StringIO()
+  latex_buf.write(LATEX_HEAD)
   pdf_fnames = []
   for page_num, collection in enumerate(collect_pages(composites)):
     fnames, transcriptions, types = [], [], []
@@ -146,16 +108,12 @@ def join_pages(composites):
       fnames.append(r['location'])
       transcriptions.append(r['transcription'])
       types.append(r['type'])
-    page_html = assemble_transcribed_html(fnames, transcriptions, types)
     pdf_fnames.append(paint_original_segments(fnames, transcriptions, page_num))
-    joined_buf.write(page_html)
-    joined_buf.write("<div> <pdf:nextpage /> </div>\n")
-  joined_buf.write(HTML_FOOT)
-  # HTML and transcribed pdf
-  with open(JOINED_HTML_FNAME, 'w') as html_file:
-    html_file.write(joined_buf.getvalue())
-  # with open(JOINED_FNAME, 'wb') as pdf_file:
-  #   pdf = pisa.CreatePDF(joined_buf, pdf_file)
+    latex_buf.write(assemble_latex(fnames, transcriptions, types))
+    latex_buf.write(LATEX_NEWPAGE_SNIPPET)
+  raw_latex = LATEX_WRAP.format(raw_latex=latex_buf.getvalue(), font_size=LATEX_FONT_SIZE)
+  # transcribed pdf
+  latex_to_pdf(raw_latex)
   # ---
   # searchable pdf
   pdf_writer = PdfFileWriter()
@@ -164,13 +122,12 @@ def join_pages(composites):
     pdf_pages.append(open(pdf_fname, 'rb'))
     pdf_reader = PdfFileReader(pdf_pages[-1])
     pdf_writer.addPage(pdf_reader.getPage(0))
-  with open(JOINED_SEARCHABLE, 'wb') as pdf_searchable:
+  with open(OVERLAY_PDF_FNAME, 'wb') as pdf_searchable:
     pdf_writer.write(pdf_searchable)
   map(lambda f: f.close(), pdf_pages)
   return json.dumps({
-    'transcribed_html': JOINED_HTML_FNAME,
-    'transcribed_pdf': JOINED_FNAME,
-    'searchable_pdf': JOINED_SEARCHABLE
+    'transcribed_pdf': LATEX_PDF_FNAME,
+    'searchable_pdf': OVERLAY_PDF_FNAME
   })
 
 
