@@ -48,6 +48,7 @@ def paint_original_segments(fnames, transcriptions, page):
 LATEX_WRAP = """
 \\documentclass{{article}}
 \\usepackage{{amsmath}}
+\\usepackage{{parskip}}
 \\begin{{document}}
 \\begin{{{font_size}}}
 {raw_latex}
