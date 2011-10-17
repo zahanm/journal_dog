@@ -77,9 +77,9 @@ def latex_to_pdf(raw_latex):
   child = Popen(pdfcreator, stdout=PIPE)
   retcode = child.wait()
   if retcode != 0:
-    stdoutdata, stderrdata = child.communicate()
-    sys.stderr.write(raw_latex + '\n')
-    sys.stderr.write(stdoutdata + '\n')
+    # stdoutdata, stderrdata = child.communicate()
+    # sys.stderr.write(raw_latex + '\n')
+    # sys.stderr.write(stdoutdata + '\n')
     return LATEX_TMP_FNAME.format('tex')
     # raise RuntimeError('Error while creating math image with pdflatex')
   move(os.path.join('tmp', LATEX_TMP_FNAME.format(format='pdf')), LATEX_PDF_FNAME)
