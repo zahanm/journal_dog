@@ -6,7 +6,7 @@ import json
 import itertools
 import os.path
 from tempfile import NamedTemporaryFile
-from subprocess import call, PIPE
+from subprocess import Popen, PIPE
 
 from xhtml2pdf import pisa
 
@@ -100,14 +100,20 @@ def math_equation_image(fname, raw_latex):
   with open(os.path.join('tmp', LATEX_TMP_FNAME.format(format='tex')), 'w') as latex_file:
     latex_file.write(LATEX_SNIPPET.format(height=height, width=width, font_size='large', raw_latex=raw_latex.strip()))
   pdfcreator = ['pdflatex', '-interaction', 'batchmode', '-output-directory', 'tmp', LATEX_TMP_FNAME.format(format='tex')]
-  retcode = call(pdfcreator, stdout=PIPE)
+  child = Popen(pdfcreator, stdout=PIPE)
+  retcode = child.wait()
   if retcode != 0:
+    stdoutdata, stderrdata = child.communicate()
+    sys.stderr.write(stdoutdata + '\n')
     return 'images/{0}'.format(fname)
     # raise RuntimeError('Error while creating math image with pdflatex')
   png_fname = os.path.join('output', 'images', os.path.basename(fname))
   converter = ['convert', os.path.join('tmp', LATEX_TMP_FNAME.format(format='pdf')), '-quality', '4', png_fname]
-  retcode = call(converter, stdout=PIPE)
+  child = Popen(converter, stdout=PIPE, stderr=PIPE)
+  retcode = child.wait()
   if retcode != 0:
+    stdoutdata, stderrdata = child.communicate()
+    sys.stderr.write(stdoutdata + '\n' + stderrdata + '\n')
     return 'images/{0}'.format(fname)
     # raise RuntimeError('Error while converting math image using imagemagick')
   return os.path.join('images', os.path.basename(fname))
