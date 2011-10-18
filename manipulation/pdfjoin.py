@@ -81,8 +81,8 @@ def latex_to_pdf(raw_latex):
     stdoutdata, stderrdata = child.communicate()
     sys.stderr.write(raw_latex + '\n')
     sys.stderr.write(stdoutdata + '\n')
+    raise RuntimeError('Error while creating math image with pdflatex')
     return LATEX_TMP_FNAME.format(format = 'tex')
-    # raise RuntimeError('Error while creating math image with pdflatex')
   move(os.path.join('tmp', LATEX_TMP_FNAME.format(format='pdf')), LATEX_PDF_FNAME)
   return LATEX_PDF_FNAME
 
@@ -125,7 +125,7 @@ def join_pages(composites):
   map(lambda f: f.close(), pdf_pages)
   return json.dumps({
     'transcribed_pdf': LATEX_PDF_FNAME,
-    'searchable_pdf': OVERLAY_PDF_FNAME
+    'overlay_pdf': OVERLAY_PDF_FNAME
   })
 
 
