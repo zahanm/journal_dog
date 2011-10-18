@@ -86,7 +86,7 @@ def split_pdf(pdf_fname):
 
 def cleanup_last_run():
   file_globs = ['data/*.png', 'tmp/*.pdf', 'tmp/*.png', 'tmp/*.tex',
-    'tmp/*.aux', 'tmp/*.log', 'output/*.pdf', 'output/images/*.png']
+    'tmp/*.aux', 'tmp/*.log', 'output/*.pdf']
   old_files = []
   map(lambda fg: old_files.extend(glob(fg)), file_globs)
   map(lambda old_file: os.remove(old_file), old_files)
