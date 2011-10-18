@@ -78,7 +78,7 @@ def split_pdf(pdf_fname):
   output = []
   pdf_fnames = split_pages(pdf_fname)
   for page, png_fname in enumerate(convert_pages(pdf_fnames)):
-    for segment_fname in divide_page_manual(page, png_fname): # divide_page(page, png_fname)
+    for segment_fname in divide_page(page, png_fname): # divide_page_manual(page, png_fname)
       output.append({ 'location': segment_fname, 'page': page })
   with open(DOG_INPUT_FNAME, 'w') as dog_input:
     json.dump(output, dog_input)
