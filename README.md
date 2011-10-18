@@ -5,11 +5,9 @@ Privacy preserving journal transcription
 ### Dependencies
 
 - Python `easy_install`
-  - xhtml2pdf
-    - pypdf
-    - reportlab
-    - html5lib
-    - pil (Python Imaging Library)
+  - pypdf
+  - reportlab
+  - pil (Python Imaging Library)
 - brew or aptitude
   - imagemagick
     - ghostscript
